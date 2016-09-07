@@ -21,9 +21,15 @@
     <ClInclude Include="dhydrology.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wflow_sbm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dhydrology.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wflow_sbm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

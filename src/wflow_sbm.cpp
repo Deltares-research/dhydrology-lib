@@ -17,7 +17,9 @@ PathFrac
 FirstZoneThickness
 */
 
-#include <math.h>
+#include <math.h> 
+#include "dhydrology.h"
+#include "wflow_sbm.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -48,7 +50,7 @@ double sCurve(double X, double a, double b, double c) {
 }
 
 void rainfall_interception_modrut(double Precipitation, double PotEvap, double CanopyGapFraction, double Cmax,
-	double& NetInterception, double& ThroughFall, double& StemFlow, double& LeftOver, double& Interception, double& CanopyStorage) {
+	double  *NetInterception, double *ThroughFall, double *StemFlow, double *LeftOver, double *Interception, double *CanopyStorage) {
 	/*
 	Interception according to a modified Rutter model.The model is solved
 	explicitly and there is no drainage below Cmax.
@@ -70,34 +72,35 @@ void rainfall_interception_modrut(double Precipitation, double PotEvap, double C
 	Pfrac = (1 - p - pt) * Precipitation;
 
 	// S cannot be larger than Cmax, no gravity drainage below that
-	DD = CanopyStorage > Cmax ? Cmax - CanopyStorage : 0.0;
-	CanopyStorage = CanopyStorage - DD;
+	DD = *CanopyStorage > Cmax ? Cmax - *CanopyStorage : 0.0;
+	*CanopyStorage = *CanopyStorage - DD;
 
 	// Add the precipitation that falls on the canopy to the store
-	CanopyStorage = CanopyStorage + Pfrac;
+	*CanopyStorage = *CanopyStorage + Pfrac;
 
 	// Now do the Evap, make sure the store does not get negative
-	dC = -1 * (CanopyStorage > PotEvap ? PotEvap : CanopyStorage);
-	CanopyStorage += dC;
+	dC = -1 * (*CanopyStorage > PotEvap ? PotEvap : *CanopyStorage);
+	*CanopyStorage += dC;
 
-	LeftOver = PotEvap + dC; // Amount of evap not used
+	*LeftOver = PotEvap + dC; // Amount of evap not used
 
 	// Now drain the canopy storage again if needed...
-	D = CanopyStorage > Cmax ? Cmax - CanopyStorage : 0.0;
-	CanopyStorage = CanopyStorage - D;
+	D = *CanopyStorage > Cmax ? Cmax - *CanopyStorage : 0.0;
+	*CanopyStorage = *CanopyStorage - D;
 
 	// Calculate throughfall
-	ThroughFall = DD + D + p * Precipitation;
-	StemFlow = Precipitation * pt;
+	*ThroughFall = DD + D + p * Precipitation;
+	*StemFlow = Precipitation * pt;
 
 	// Calculate interception, this is NET Interception
-	NetInterception = Precipitation - ThroughFall - StemFlow;
-	Interception = -dC;
+	*NetInterception = Precipitation - *ThroughFall - *StemFlow;
+	*Interception = -dC;
 }
 
 
 
-double actEvap_SBM(double RootingDepth, double WTable, double& UStoreDepth, double& FirstZoneDepth, double PotTrans, double smoothpar) {
+double actEvap_SBM(double RootingDepth, double WTable, double *UStoreDepth, double *FirstZoneDepth, 
+	double *ActEvapUStore, double PotTrans, double smoothpar) {
 	/*
 	
 	Actual evaporation function :
@@ -126,25 +129,25 @@ double actEvap_SBM(double RootingDepth, double WTable, double& UStoreDepth, doub
 		# to be a 0 - 1 curve
 	*/
 	int ust = 0;
-	double wetroots, ActEvapSat, RestPotEvap, AvailCap, MaxExtr, ActEvap, ActEvapUStore;
+	double wetroots, ActEvapSat, RestPotEvap, AvailCap, MaxExtr, ActEvap;
 
 	wetroots = sCurve(WTable, RootingDepth, 1.0, smoothpar);
-	ActEvapSat = MIN(PotTrans * wetroots, FirstZoneDepth);
-	FirstZoneDepth = FirstZoneDepth - ActEvapSat;
+	ActEvapSat = MIN(PotTrans * wetroots, *FirstZoneDepth);
+	*FirstZoneDepth = (*FirstZoneDepth) - ActEvapSat;
 	RestPotEvap = PotTrans - ActEvapSat;
 
 	// now try unsat store
 	// #AvailCap = min(1.0, max(0.0, (WTable - RootingDepth) / (RootingDepth + 1.0)))
 
 	if (ust >= 1) {
-		AvailCap = UStoreDepth * 0.99;
+		AvailCap = *UStoreDepth * 0.99;
 	}else{
 		AvailCap = MAX(0.0, WTable < RootingDepth ? 1.0 : RootingDepth / (WTable + 1.0));
 	}
-	MaxExtr = AvailCap * UStoreDepth;
-	ActEvapUStore = MIN(MaxExtr, MIN(RestPotEvap, UStoreDepth));
-	UStoreDepth = UStoreDepth - ActEvapUStore;
-	ActEvap = ActEvapSat + ActEvapUStore;
+	MaxExtr = AvailCap * *UStoreDepth;
+	*ActEvapUStore = MIN(MaxExtr, MIN(RestPotEvap, *UStoreDepth));
+	*UStoreDepth = *UStoreDepth - *ActEvapUStore;
+	ActEvap = ActEvapSat + *ActEvapUStore;
 
 	return (ActEvap);
 }
@@ -153,74 +156,80 @@ double actEvap_SBM(double RootingDepth, double WTable, double& UStoreDepth, doub
 /*
 	WaterFrac - fraction of open water in this unit
 */
-void wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel) {
-
+void wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel,  sbm_par	par, sbm_state state) {
 	double MporeFrac = 0.0;
+	double PotTransSoil, NetInterception, ThroughFall, StemFlow, LeftOver, Interception, zi, UStoreCapacity, AvailableForInfiltration;
+	double RunoffOpenWater, SoilInf, PathInf, MaxInfiltSoil, InfiltSoil, soilInfRedu = 0.0, MaxInfiltPath, InfiltPath;
+	double ActInfilt, ActEvapUStore;
 
-	rainfall_interception_modrut(Precipitation, PotEvap, CanopyGapFraction, Cmax, NetInterception, ThroughFall, StemFlow, LeftOver,
-		Interception, CanopyStorage);
+	double ActRootingDepth = par.RootingDepth;
+	// first run the rainfall interception function
+	rainfall_interception_modrut(Precipitation, PotEvap, par.CanopyGapFraction, par.Cmax, &NetInterception, &ThroughFall, &StemFlow, 
+		&LeftOver,	&Interception, &state.CanopyStorage);
 
 	PotTransSoil = MAX(0.0, LeftOver); //  # now in mm
-	Interception = NetInterception
+	Interception = NetInterception;
+	zi = MAX(0.0, par.FirstZoneThickness - state.FirstZoneDepth / (par.thetaS - par.thetaR));//  # Determine actual water depth
 	// set FirstZoenDepth -> this extra only neede to be able to set zi from the outside
-	FirstZoneDepth = (thetaS - thetaR) * (FirstZoneThickness - zi);
-	UStoreCapacity = FirstZoneCapacity - FirstZoneDepth - UStoreDepth;
+	state.FirstZoneDepth = (par.thetaS - par.thetaR) * (par.FirstZoneThickness - zi);
+	UStoreCapacity = par.FirstZoneCapacity - state.FirstZoneDepth - state.UStoreDepth;
 	AvailableForInfiltration = ThroughFall + StemFlow;
 
 	// Runoff from water bodies and river network
 	RunoffOpenWater = WaterFrac * AvailableForInfiltration;
-	AvailableForInfiltration -= self.RunoffOpenWater;
+	AvailableForInfiltration -= RunoffOpenWater;
 
 	// TODO: add runoff subgrid generation. We ignore subgrid runoff generation for now!
 
 	// First determine if the soil infiltration capacity can deal with the
 	// amount of water
 	// split between infiltration in undisturbed soil and compacted areas(paths)
-	SoilInf = AvailableForInfiltration * (1 - self.PathFrac);
-	PathInf = AvailableForInfiltration * PathFrac;
+	SoilInf = AvailableForInfiltration * (1 - par.PathFrac);
+	PathInf = AvailableForInfiltration * par.PathFrac;
 	
 	// TODO: add soil infiltration reduction and snow modelling
-	MaxInfiltSoil = MIN(SoilInf, InfiltCapSoil * soilInfRedu); 
+	MaxInfiltSoil = MIN(SoilInf, par.InfiltCapSoil * soilInfRedu); 
 	InfiltSoil = MIN(MaxInfiltSoil, UStoreCapacity);
-	UStoreDepth = UStoreDepth + InfiltSoil;
+	state.UStoreDepth = state.UStoreDepth + InfiltSoil;
 	UStoreCapacity = UStoreCapacity - InfiltSoil;
 	AvailableForInfiltration = AvailableForInfiltration - InfiltSoil;
-	MaxInfiltPath = MIN(self.InfiltCapPath * soilInfRedu, PathInf);
+	MaxInfiltPath = MIN(par.InfiltCapPath * soilInfRedu, PathInf);
 	InfiltPath = MIN(MaxInfiltPath, UStoreCapacity);
-	UStoreDepth = UStoreDepth + InfiltPath;
-	UStoreCapacity = UStoreCapacity - InfiltPath;
+	state.UStoreDepth +=  InfiltPath;
+	UStoreCapacity -= InfiltPath;
 	AvailableForInfiltration = AvailableForInfiltration - InfiltPath;
 	ActInfilt = InfiltPath + InfiltSoil;
-	InfiltExcess = UStoreCapacity > 0.0 ? self.AvailableForInfiltration : 0.0;
-	ExcessWater = AvailableForInfiltration; // Saturation overland flow
+	double InfiltExcess = UStoreCapacity > 0.0 ? AvailableForInfiltration : 0.0;
+	double ExcessWater = AvailableForInfiltration; // Saturation overland flow
 	
 	// Limit rootingdepth(if set externally)
-	ActRootingDepth = MIN(FirstZoneThickness * 0.99, ActRootingDepth);
+	ActRootingDepth = MIN(par.FirstZoneThickness * 0.99, ActRootingDepth);
 	// Determine transpiration
 	// Split between bare soil / open water and vegetation
-	potsoilopenwaterevap = (1.0 - CanopyGapFraction) * PotTransSoil;
-	PotTrans = PotTransSoil - potsoilopenwaterevap;
+	double potsoilopenwaterevap = (1.0 - par.CanopyGapFraction) * PotTransSoil;
+	double PotTrans = PotTransSoil - potsoilopenwaterevap;
 	
-	SaturationDeficit = self.FirstZoneCapacity - self.FirstZoneDepth;
+	double SaturationDeficit = par.FirstZoneCapacity - state.FirstZoneDepth;
 	// Linear reduction of soil moisture evaporation based on deficit
 	// Determine transpiration
 		
 	// Determine Open Water EVAP.Later subtract this from water that
 	// enters the Kinematic wave
-	RestEvap = potsoilopenwaterevap;
-	ActEvapOpenWater = MIN(WaterLevel * 1000.0 * self.WaterFrac, self.WaterFrac * self.RestEvap);
+	double RestEvap = potsoilopenwaterevap;
+	double ActEvapOpenWater = MIN(WaterLevel * 1000.0 * WaterFrac, WaterFrac * RestEvap);
 	RestEvap = RestEvap - ActEvapOpenWater;
 	// Next the rest is used for soil evaporation
-	soilevap = RestEvap * MAX(0.0, MIN(1.0, SaturationDeficit / FirstZoneCapacity));
-	soilevap = MIN(self.soilevap, self.UStoreDepth);
-	UStoreDepth = UStoreDepth - soilevap;
+	double soilevap = RestEvap * MAX(0.0, MIN(1.0, SaturationDeficit / par.FirstZoneCapacity));
+	soilevap = MIN(soilevap, state.UStoreDepth);
+	state.UStoreDepth -= soilevap;
 	// rest is used for transpiration
 	PotTrans = PotTransSoil - soilevap - ActEvapOpenWater;
 	
-	Transpiration = actEvap_SBM(double ActRootingDepth, double.zi, double& UStoreDepth, double& FirstZoneDepth, double PotTrans, 3000.0);
+	double Transpiration = actEvap_SBM(ActRootingDepth, zi,  &state.UStoreDepth,  &state.FirstZoneDepth,  &ActEvapUStore,
+		PotTrans, 3000.0);
 
 
-	ActEvap = Transpiration + soilevap + ActEvapOpenWater;
+	double ActEvap = Transpiration + soilevap + ActEvapOpenWater;
 	//##########################################################################
 	//# Transfer of water from unsaturated to saturated store...################
 	//##########################################################################
@@ -228,61 +237,60 @@ void wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, 
 	//# this deficit does NOT take into account the water in the unsaturated zone
 
 	//# Optional Macrco - Pore transfer
-	MporeTransfer = ActInfilt * MporeFrac;
-	FirstZoneDepth += MporeTransfer;
-	UStoreDepth -= MporeTransfer;
+	double MporeTransfer = ActInfilt * MporeFrac;
+	state.FirstZoneDepth += MporeTransfer;
+	state.UStoreDepth -= MporeTransfer;
 	
-	SaturationDeficit = self.FirstZoneCapacity - self.FirstZoneDepth;
+	SaturationDeficit = par.FirstZoneCapacity - state.FirstZoneDepth;
 	
-	zi = MAX(0.0, FirstZoneThickness - FirstZoneDepth / (thetaS - thetaR));//  # Determine actual water depth
-	Ksat = FirstZoneKsatVer * exp(-f * zi);
-	DeepKsat = FirstZoneKsatVer * exp(-f * FirstZoneThickness);
+	zi = MAX(0.0, par.FirstZoneThickness - state.FirstZoneDepth / (par.thetaS - par.thetaR));//  # Determine actual water depth
+	double Ksat = par.FirstZoneKsatVer * exp(-par.f * zi);
+	double DeepKsat = par.FirstZoneKsatVer * exp(-par.f * par.FirstZoneThickness);
 
 	//# now the actual transfer to the saturated store..
-	Transfer = MIN(UStoreDepth, self.SaturationDeficit <= 0.00001 ? 0.0 : Ksat * UStoreDepth / (SaturationDeficit + 1)));
+	double Transfer = MIN(state.UStoreDepth, SaturationDeficit <= 0.00001 ? 0.0 : Ksat * state.UStoreDepth / (SaturationDeficit + 1));
 
-	MaxCapFlux = MAX(0.0, MIN(Ksat, MIN(ActEvapUStore, MIN(UStoreCapacity, FirstZoneDepth))));
+	double MaxCapFlux = MAX(0.0, MIN(Ksat, MIN(ActEvapUStore, MIN(UStoreCapacity, state.FirstZoneDepth))));
 
 	//# No capilary flux is roots are in water, max flux if very near to water, lower flux if distance is large
-	CapFluxScale = zi > ActRootingDepth ? CapScale / (CapScale + zi - ActRootingDepth) * timestepsecs / basetimestep : 0.0;
-	CapFlux = MaxCapFlux * CapFluxScale;
+	double CapFluxScale = zi > ActRootingDepth ? par.CapScale / (par.CapScale + zi - ActRootingDepth) * par.timestepsecs / par.basetimestep : 0.0;
+	double CapFlux = MaxCapFlux * CapFluxScale;
 	// Determine Ksat at base
-	DeepTransfer = MIN(FirstZoneDepth, DeepKsat);
+	double DeepTransfer = MIN(state.FirstZoneDepth, DeepKsat);
 	//#ActLeakage = 0.0
 	//# Now add leakage.to deeper groundwater
-	ActLeakage = MAX(0.0, MIN(self.MaxLeakage, self.DeepTransfer));
-	Percolation = MAX(0.0, MIN(MaxPercolation, DeepTransfer));
+	double ActLeakage = MAX(0.0, MIN(par.MaxLeakage, DeepTransfer));
+	double Percolation = MAX(0.0, MIN(par.MaxPercolation, DeepTransfer));
 	
-	ActLeakage = Seepage > 0.0 ? -1.0 * Seepage : ActLeakage;
-	FirstZoneDepth = FirstZoneDepth + Transfer - CapFlux - ActLeakage - Percolation;
-	UStoreDepth = UStoreDepth - Transfer + CapFlux;
+	// ActLeakage = Seepage > 0.0 ? -1.0 * Seepage : ActLeakage;
+	state.FirstZoneDepth = state.FirstZoneDepth + Transfer - CapFlux - ActLeakage - Percolation;
+	state.UStoreDepth = state.UStoreDepth - Transfer + CapFlux;
 	//##########################################################################
 	// # Horizontal(downstream) transport of water #############################
 	// ##########################################################################
-	zi = MAX(0.0, FirstZoneThickness - FirstZoneDepth / (thetaS - thetaR)); //  # Determine actual water depth
+	zi = MAX(0.0, par.FirstZoneThickness - state.FirstZoneDepth / (par.thetaS - par.thetaR)); //  # Determine actual water depth
 
 	//# Re - Determine saturation deficit.NB, as noted by Vertessy and Elsenbeer 1997
 	//# this deficit does NOT take into account the water in the unsaturated zone
-	SaturationDeficit = FirstZoneCapacity - FirstZoneDepth;
+	SaturationDeficit = par.FirstZoneCapacity - state.FirstZoneDepth;
 
 	// TODO: lateral transport
 	//##########################################################################
 	//# Determine returnflow from first zone          ##########################
 	//##########################################################################
-	ExfiltWaterFrac = sCurve(FirstZoneDepth, FirstZoneCapacity, 1.0, 5.0);
-	ExfiltWater = ExfiltWaterFrac * (FirstZoneDepth - FirstZoneCapacity);
+	double ExfiltWaterFrac = sCurve(state.FirstZoneDepth, par.FirstZoneCapacity, 1.0, 5.0);
+	double ExfiltWater = ExfiltWaterFrac * (state.FirstZoneDepth - par.FirstZoneCapacity);
 	//#self.ExfiltWater = ifthenelse(self.FirstZoneDepth - self.FirstZoneCapacity > 0, self.FirstZoneDepth - self.FirstZoneCapacity, 0.0)
-	FirstZoneDepth -= ExfiltWater;
+	state.FirstZoneDepth -= ExfiltWater;
 
 	//# Re - determine UStoreCapacity
-	zi = MAX(0.0, FirstZoneThickness - FirstZoneDepth / (thetaS - thetaR));//  # Determine actual water depth
+	zi = MAX(0.0, par.FirstZoneThickness - state.FirstZoneDepth / (par.thetaS - par.thetaR));//  # Determine actual water depth
 
-	ExfiltFromUstore = zi == 0.0 ? (self.UStoreDepth > 0.0 ? self.UStoreDepth : self.ZeroMap) : self.ZeroMap;
+	double ExfiltFromUstore = zi == 0.0 ? (state.UStoreDepth > 0.0 ? state.UStoreDepth : 0.0) : 0.0;
 	
 	ExfiltWater += ExfiltFromUstore;
-	UStoreDepth -= ExfiltFromUstore;
-	UStoreCapacity = FirstZoneCapacity - FirstZoneDepth - UStoreDepth;
-	Ksat = FirstZoneKsatVer * exp(-f * zi);
-
+	state.UStoreDepth -= ExfiltFromUstore;
+	UStoreCapacity = par.CanopyGapFraction - state.FirstZoneDepth - state.UStoreDepth;
+	Ksat = par.FirstZoneKsatVer * exp(-par.f * zi);
 
 }

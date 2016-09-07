@@ -81,9 +81,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dhydrology.h" />
+    <ClInclude Include="wflow_sbm.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dhydrology.cpp" />
+    <ClCompile Include="wflow_sbm.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

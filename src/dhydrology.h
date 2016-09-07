@@ -18,8 +18,10 @@
 extern "C"
 {
 #endif
-
     EXPORT_API int initialize();
+	EXPORT_API int update();
+
+
 
 #ifdef __cplusplus
 }
