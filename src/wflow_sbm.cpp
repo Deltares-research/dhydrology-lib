@@ -156,7 +156,7 @@ double actEvap_SBM(double RootingDepth, double WTable, double *UStoreDepth, doub
 /*
 	WaterFrac - fraction of open water in this unit
 */
-void wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel,  sbm_par	par, sbm_state state) {
+int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel,  sbm_par	par, sbm_state state) {
 	double MporeFrac = 0.0;
 	double PotTransSoil, NetInterception, ThroughFall, StemFlow, LeftOver, Interception, zi, UStoreCapacity, AvailableForInfiltration;
 	double RunoffOpenWater, SoilInf, PathInf, MaxInfiltSoil, InfiltSoil, soilInfRedu = 0.0, MaxInfiltPath, InfiltPath;
@@ -292,5 +292,11 @@ void wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, 
 	state.UStoreDepth -= ExfiltFromUstore;
 	UStoreCapacity = par.CanopyGapFraction - state.FirstZoneDepth - state.UStoreDepth;
 	Ksat = par.FirstZoneKsatVer * exp(-par.f * zi);
+
+	out_sbm.retval = 0;
+
+
+
+	return(0);
 
 }

@@ -20,6 +20,7 @@ extern "C"
 #endif
 
     EXPORT_API int HYDRO_INITIALIZE();
+	EXPORT_API int HYDRO_UPDATE_CELL();
 
 #ifdef __cplusplus
 }

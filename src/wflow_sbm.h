@@ -26,4 +26,16 @@ struct sbm_state {
 	double FirstZoneDepth = 0.0;
 	double UStoreDepth = 0.0;
 };
+
+struct sbm_out
+{
+	int retval = 0;
+
+};
+
+sbm_state state_sbm;
+sbm_par par_sbm;
+sbm_out out_sbm;
+
+int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel, sbm_par	par, sbm_state state);
 #endif
