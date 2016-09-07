@@ -18,10 +18,8 @@
 extern "C"
 {
 #endif
-    EXPORT_API int initialize();
-	EXPORT_API int update();
 
-
+    EXPORT_API int HYDRO_INITIALIZE();
 
 #ifdef __cplusplus
 }
