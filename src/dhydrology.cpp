@@ -1,7 +1,7 @@
 // SampleCppLibrary.cpp : Defines the exported functions for the DLL application.
 
 #include <string>
-#include <sstream>
+#include <iostream>
 
 #include "dhydrology.h"
 
@@ -13,8 +13,10 @@ void main()
 #endif
 
 extern "C" {
-    EXPORT_API int initialize()
+    EXPORT_API int HYDRO_INITIALIZE()
     {
+        std::cout << "Hello world!" << std::endl;
+
         return 0;
     }
 
