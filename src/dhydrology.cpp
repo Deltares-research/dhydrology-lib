@@ -25,6 +25,7 @@ extern "C" {
 
 }
 
+
 extern "C" {
 	EXPORT_API int HYDRO_UPDATE_CELL(double *Precipitation, double *PotEvap, double *WaterFrac, double *WaterLevel,
 		double *CanopyStorage, double *UStoreDepth, double *FirstZoneDepth,
@@ -39,5 +40,3 @@ extern "C" {
 		return (ret);
 	}
 }
-
-

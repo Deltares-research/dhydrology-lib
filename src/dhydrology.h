@@ -20,7 +20,9 @@ extern "C"
 #endif
 
     EXPORT_API int HYDRO_INITIALIZE();
-	EXPORT_API int HYDRO_UPDATE_CELL();
+	EXPORT_API int HYDRO_UPDATE_CELL(double *Precipitation, double *PotEvap, double *WaterFrac, double *WaterLevel,
+		double *CanopyStorage, double *UStoreDepth, double *FirstZoneDepth,
+		double *EvapoTranspiration, double *ToRunoff);
 
 #ifdef __cplusplus
 }

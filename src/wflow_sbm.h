@@ -33,9 +33,6 @@ struct sbm_out
 
 };
 
-sbm_state state_sbm;
-sbm_par par_sbm;
-sbm_out out_sbm;
 
 int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel, sbm_par	par, sbm_state state);
 #endif

@@ -24,6 +24,9 @@ FirstZoneThickness
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
+sbm_state state_sbm;
+sbm_par par_sbm;
+sbm_out out_sbm;
 
 
 double sCurve(double X, double a, double b, double c) {
