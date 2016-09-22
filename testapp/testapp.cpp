@@ -11,7 +11,6 @@ sbm_out myout;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-
 	double P = 1.0, PET = 2.0, WF = 0.1, WL = 0.0, C = 1.0, US = 20, FZ = 3000, AET = 0.0, Q = 0.0;
 	int a;
 
@@ -28,11 +27,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			P = 0.0;
 		}
-		HYDRO_UPDATE_CELL(&P, &PET, &WF, &WL,
+		HYDRO_UPDATE_CELL(P, PET, WF, WL,3600,
 			&C, &US, &FZ,
-			&AET, &Q, &myout);
+			&AET, &Q);
 
-		std::cout << FZ << "," << US << "," << C << "," << P << "," << myout.TotEvap << "," << myout.Inwater << std::endl;
+		std::cout << FZ << "," << US << "," << C << "," << P << "," << AET << "," << Q << std::endl;
 	}
 
 }
