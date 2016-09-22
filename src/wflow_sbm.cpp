@@ -167,6 +167,33 @@ int wfhydro_sbm_initial(sbm_par *par)
  */
 {
 	/* set the f parameter */
+	
+	par->CanopyGapFraction = 0.2;
+	par->Cmax = 1.0;
+	par->thetaS = 0.6;
+	par->thetaR = 0.01;
+	par->FirstZoneThickness = 8000;
+	par->FirstZoneCapacity = 4000;
+	par->PathFrac = 0.0;
+	par->InfiltCapSoil = 2000;
+	par->InfiltCapPath = 10;
+	par->RootingDepth = 1200;
+	par->FirstZoneKsatVer = 400.;
+	par->f = 0.0;
+	par->CapScale = 5000;
+	par->timestepsecs = 86400;
+	par->basetimestep = 3600;
+	par->MaxLeakage = 0.0;
+	par->MaxPercolation = 0.0;
+	par->M = 500.0;
+	par->GWScale = 0.0;
+	par->RunoffGeneratingGWPerc = 0.1;
+	par->DrainageBase = 100.0;
+	par->DemMax = 100.0;
+	par->Altitude = 100.0;
+	par->CC = 0.0;
+	par->Slope = 0.01;
+	par->FirstZoneKsatHorFrac = 1.0;
 
 	par->f = (par->thetaS - par->thetaR) / par->M;
 	/* calculate S-curve constants in two parts */

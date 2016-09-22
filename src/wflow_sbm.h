@@ -2,49 +2,49 @@
 #define WFLOW_SBM_H
 /// move to model init
 struct sbm_par {
-	double CanopyGapFraction = 0.2;
-	double Cmax = 1.0;
-	double thetaS = 0.6;
-	double thetaR = 0.01;
-	double FirstZoneThickness = 8000;
-	double FirstZoneCapacity = 4000;
-	double PathFrac  = 0.0;
-	double InfiltCapSoil = 2000;
-	double InfiltCapPath = 10;
-	double RootingDepth = 1200;
-	double FirstZoneKsatVer = 400.;
-	double f = 0.0;
-	double CapScale = 5000;
-	double timestepsecs = 86400;
-	double basetimestep = 3600;
-	double MaxLeakage = 0.0;
-	double MaxPercolation = 0.0;
-	double M = 500.0;
-	double GWScale = 0.0;
-	double RunoffGeneratingGWPerc=0.1;
-	double DrainageBase=100.0;
-	double DemMax=100.0;
-	double Altitude = 100.0;
-	double CC = 0.0;
-	double Slope = 0.01;
-	double FirstZoneKsatHorFrac = 1.0;
+	double CanopyGapFraction;
+	double Cmax;
+	double thetaS;
+	double thetaR;
+	double FirstZoneThickness;
+	double FirstZoneCapacity;
+	double PathFrac;
+	double InfiltCapSoil;
+	double InfiltCapPath;
+	double RootingDepth;
+	double FirstZoneKsatVer;
+	double f;
+	double CapScale;
+	double timestepsecs;
+	double basetimestep;
+	double MaxLeakage;
+	double MaxPercolation;
+	double M;
+	double GWScale;
+	double RunoffGeneratingGWPerc;
+	double DrainageBase;
+	double DemMax;
+	double Altitude;
+	double CC;
+	double Slope;
+	double FirstZoneKsatHorFrac;
 };
 
 struct sbm_state {
-	double CanopyStorage = 0.0;
-	double FirstZoneDepth = 0.0;
-	double UStoreDepth = 0.0;
+	double CanopyStorage;
+	double FirstZoneDepth;
+	double UStoreDepth;
 };
 
 struct sbm_out
 {
-	int retval = 0;
-	double Inwater = 0.0;
-	double ActEvap = 0.0;
-	double Interception = 0.0;
+	int retval;
+	double Inwater;
+	double ActEvap;
+	double Interception;
 	double TotEvap;
-	double StemFlow = 0.0;
-	double ThroughFall = 0.0;
+	double StemFlow;
+	double ThroughFall;
 	double ExcessWater;
 	double RunoffOpenWater;
 	double SubCellRunoff;
