@@ -36,7 +36,13 @@ class DHydrology:
         self.lib = load_library(self.LIBRARY_PATH)
 
     def solve(self, p):
-        self.lib.HELLO_DHYDRO(p)
+        self.lib.HELLO_DHYDRO(c_double(p))
+
+    def HYDRO_INITIALIZE(self, conf):
+        self.lib.HYDRO_INITIALIZE(conf)
+
+    def HYDRO_UPDATE_CELL(self, P, PET, WF, WL, dt, C, US, FZ, AET, Q):
+        self.lib.HYDRO_UPDATE_CELL(P, PET, WF, WL, dt, C, US, FZ, AET, Q)
 
     def finalize(self):
         unload_library(self.lib)
