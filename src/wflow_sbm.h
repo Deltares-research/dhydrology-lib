@@ -20,6 +20,14 @@ struct sbm_par {
 	double MaxLeakage = 0.0;
 	double MaxPercolation = 0.0;
 	double M = 500.0;
+	double GWScale = 0.0;
+	double RunoffGeneratingGWPerc=0.1;
+	double DrainageBase=150.0;
+	double DemMax=125.0;
+	double Altitude = 112.0;
+	double CC = 0.0;
+	double Slope = 0.01;
+	double FirstZoneKsatHorFrac = 1.0;
 };
 
 struct sbm_state {
@@ -62,4 +70,5 @@ extern "C" {
 
 int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel, sbm_par	par, 
 	sbm_state *state);
+int wfhydro_sbm_initial(sbm_par *par);
 #endif

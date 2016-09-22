@@ -161,6 +161,25 @@ double actEvap_SBM(double RootingDepth, double WTable, double *UStoreDepth, doub
 }
 
 
+int wfhydro_sbm_initial(sbm_par *par)
+/*
+ * Initializes the parameters and does one-time calculations
+ */
+{
+	/* set the f parameter */
+
+	par->f = (par->thetaS - par->thetaR) / par->M;
+	/* calculate S-curve constants in two parts */
+
+	double CClow = MIN(100.0, -log(1.0 / 0.1 - 1) / MIN(-0.1, par->DrainageBase - par->Altitude));
+	double CCup = MIN(100.0, -log(1.0 / 0.1 - 1) / MIN(-0.1, par->Altitude - par->DemMax));
+	par->CC = (CClow + CCup) * 0.5;
+
+	/* Th was in resume of python code*/
+	par->GWScale = (par->DemMax - par->DrainageBase) / par->FirstZoneThickness / par->RunoffGeneratingGWPerc;
+	return 0;
+}
+
 /*
 	WaterFrac - fraction of open water in this unit
 */
@@ -172,7 +191,7 @@ int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, d
 
 
 	par.FirstZoneCapacity = par.FirstZoneThickness * (par.thetaS - par.thetaR);
-	par.f = (par.thetaS - par.thetaR) / par.M;
+
 	double ActRootingDepth = par.RootingDepth;
 	// first run the rainfall interception function
 	rainfall_interception_modrut(Precipitation, PotEvap, par.CanopyGapFraction, par.Cmax, &NetInterception, 
@@ -191,7 +210,21 @@ int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, d
 	double RunoffOpenWater = WaterFrac * AvailableForInfiltration;
 	AvailableForInfiltration -= RunoffOpenWater;
 
-	// TODO: add runoff subgrid generation. We ignore subgrid runoff generation for now!
+	double AbsoluteGW = par.DemMax - (zi * par.GWScale);
+	/* Determine saturated fraction of cell */
+	double SubCellFrac = sCurve(AbsoluteGW, par.Altitude + 1.0, 1.0, par.CC);
+	/* Make sure total of SubCellFRac + WaterFRac + RiverFrac <= 1 to avoid double counting */
+	double Frac_correction = 0.0;
+	if ((SubCellFrac + WaterFrac) > 1.0)
+	{
+		Frac_correction = SubCellFrac + WaterFrac - 1.0;
+	}
+	double SubCellRunoff = (SubCellFrac - Frac_correction) * AvailableForInfiltration;
+
+	double	SubCellGWRunoff = MIN(SubCellFrac * states->FirstZoneDepth,
+		MAX(0.0, SubCellFrac * par.Slope * par.FirstZoneKsatVer * 	par.FirstZoneKsatHorFrac * exp(-par.f * zi)));
+	states->FirstZoneDepth = states->FirstZoneDepth - SubCellGWRunoff;
+	AvailableForInfiltration = AvailableForInfiltration - SubCellRunoff;
 
 	// First determine if the soil infiltration capacity can deal with the
 	// amount of water
@@ -305,7 +338,7 @@ int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, d
 	UStoreCapacity = par.FirstZoneCapacity - states->FirstZoneDepth - states->UStoreDepth;
 	Ksat = par.FirstZoneKsatVer * exp(-par.f * zi);
 
-	double SubCellRunoff = 0.0, SubCellGWRunoff = 0.0, reinfiltwater = 0.0;
+	double reinfiltwater = 0.0;
 	double InwaterMM = MAX(0.0, ExfiltWater + ExcessWater + SubCellRunoff + SubCellGWRunoff + RunoffOpenWater -
 		reinfiltwater - ActEvapOpenWater);
 

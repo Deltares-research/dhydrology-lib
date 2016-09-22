@@ -16,9 +16,10 @@ void main()
 extern "C" {
     EXPORT_API int HYDRO_INITIALIZE(char *configfile)
     {
-        std::cout << "Hello world!" << std::endl;
+		int ret = wfhydro_sbm_initial(&par_sbm);
 
-        return 0;
+
+        return ret;
     }
 
 	EXPORT_API int HYDRO_FINALIZE()
