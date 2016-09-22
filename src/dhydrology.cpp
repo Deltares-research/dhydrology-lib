@@ -36,25 +36,32 @@ extern "C" {
 
 extern "C" {
 	EXPORT_API int HYDRO_UPDATE_CELL(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel,
+		double timestep,
 		double *CanopyStorage, double *UStoreDepth, double *FirstZoneDepth,
 		double *EvapoTranspiration, double *ToRunoff)
 		/**
+		 *  @brief Updates the hydrological model
+		 *  
 		 *  @param precipitation (mm in this timestep)
 		 *  @param PotEvap (mm in this timestep)
 		 *  @param WaterFrac (fraction of Open water between 0-1)
 		 *  @double WaterLevel (m)
+		 *  @double tiemstep length of this timestep (s)
 		 *  
 		 *  State variables:
 		 *  @param *CanopyStorage (mm)
 		 *  @param *UStoreDetpt (mm)
 		 *  @param *FirstZoneDepth (mm)
-		 *  @param EvapoTranspiration (mm)
-		 *  @param ToRunoff (mm) met runoff (can also be -)
+		 *  
+		 *  Output
+		 *  @param *EvapoTranspiration (mm)
+		 *  @param *ToRunoff (mm) met runoff (can also be -)
 		 */
 	{
 		state_sbm.CanopyStorage = *CanopyStorage;
 		state_sbm.FirstZoneDepth = *FirstZoneDepth;
 		state_sbm.UStoreDepth = *UStoreDepth;
+		par_sbm.timestepsecs = timestep;
 		int ret = wfhydro_sbm_update(Precipitation, PotEvap, WaterFrac, WaterLevel, par_sbm, &state_sbm);
 
 		
