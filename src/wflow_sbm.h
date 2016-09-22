@@ -71,4 +71,7 @@ extern "C" {
 int wfhydro_sbm_update(double Precipitation, double PotEvap, double WaterFrac, double WaterLevel, sbm_par	par, 
 	sbm_state *state);
 int wfhydro_sbm_initial(sbm_par *par);
+void rainfall_interception_modrut(double Precipitation, double PotEvap, double CanopyGapFraction, double Cmax,
+	double  *NetInterception, double *ThroughFall, double *StemFlow, double *LeftOver, double *Interception,
+	double *CanopyStorage);
 #endif
