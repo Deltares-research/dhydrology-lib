@@ -107,25 +107,29 @@ void rainfall_interception_modrut(double Precipitation, double PotEvap, double C
 
 double actEvap_SBM(double RootingDepth, double WTable, double *UStoreDepth, double *FirstZoneDepth, 
 	double *ActEvapUStore, double PotTrans, double smoothpar) {
-	/*
-	
-	Actual evaporation function :
-
-	-first try to get demand from the saturated zone, using the rootingdepth as a limiting factor
-		- secondly try to get the remaining water from the unsaturated store
-		- it uses an S - Curve the make sure roots het wet / dry gradually(basically)
-		representing a root - depth distribution
-
-		if ust is True, all ustore is deemed to be avaiable fro the roots a
-
-		Input :
-
-	-RootingDepth, WTable, UStoreDepth, FirstZoneDepth, PotTrans, smoothpar
-
-	Output :
-
-	-ActEvap, FirstZoneDepth, UStoreDepth ActEvapUStore
-	*/
+	/**
+	 * @brief	Actual evaporation function
+	 * 
+	 *  - first try to get demand from the saturated zone, using the rootingdepth as a limiting factor
+	 *  - secondly try to get the remaining water from the unsaturated store
+	 *  - it uses an S - Curve the make sure roots het wet / dry gradually(basically) representing a root - depth distribution
+	 * 
+	 *  if ust is True, all ustore is deemed to be avaiable fro the roots a
+	 *  
+	 *  Input :
+	 *  @param[in] RootingDepth
+	 *  @param[in] WTable
+	 *  @param[in] UStoreDepth
+	 *  @param[in] FirstZoneDepth
+	 *  @param[in] PotTrans
+	 *  @param[in] smoothpar
+	 *  
+	 *  Output :
+	 *  @param[out] ActEvap
+	 *  @param[out] FirstZoneDepth
+	 *  @param[out] UStoreDepth 
+	 *  @param[out] ActEvapUStore
+	 */
 
 	// Step 1 from saturated zone, use rootingDepth as a limiting factor
 	/*	#rootsinWater = WTable < RootingDepth
@@ -142,9 +146,6 @@ double actEvap_SBM(double RootingDepth, double WTable, double *UStoreDepth, doub
 	ActEvapSat = MIN(PotTrans * wetroots, *FirstZoneDepth);
 	*FirstZoneDepth = (*FirstZoneDepth) - ActEvapSat;
 	RestPotEvap = PotTrans - ActEvapSat;
-
-	// now try unsat store
-	// #AvailCap = min(1.0, max(0.0, (WTable - RootingDepth) / (RootingDepth + 1.0)))
 
 	if (ust >= 1) {
 		AvailCap = *UStoreDepth * 0.99;
