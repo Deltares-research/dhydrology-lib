@@ -58,17 +58,16 @@ double sCurve(double X, double a, double b, double c) {
 void rainfall_interception_modrut(double Precipitation, double PotEvap, double CanopyGapFraction, double Cmax,
 	double  *NetInterception, double *ThroughFall, double *StemFlow, double *LeftOver, double *Interception, 
 		double *CanopyStorage) {
-	/*
-	Interception according to a modified Rutter model.The model is solved
-	explicitly and there is no drainage below Cmax.
-
-	Returns :
-	-NetInterception : P - TF - SF(may be different from the actual wet canopy evaporation)
-	- ThroughFall :
-	-StemFlow :
-	-LeftOver : Amount of potential eveporation not used
-	- Interception : Actual wet canopy evaporation in this thimestep
-	- CanopyStorage : Canopy storage at the end of the timestep
+	/**
+	 *  @brief Interception according to a modified Rutter model. The model is solved explicitly and there is no drainage below Cmax.
+	 *
+	 * 
+	 *  @param NetInterception : P - TF - SF(may be different from the actual wet canopy evaporation)
+	 *  @param ThroughFall
+	 *  @param StemFlow
+	 *  @param LeftOver : Amount of potential eveporation not used
+	 *  @param Interception : Actual wet canopy evaporation in this thimestep
+	 *  @param CanopyStorage : Canopy storage at the end of the timestep
 	*/
 	double p, pt, Pfrac, DD, dC, D;
 
@@ -163,7 +162,7 @@ double actEvap_SBM(double RootingDepth, double WTable, double *UStoreDepth, doub
 
 int wfhydro_sbm_initial(sbm_par *par)
 /*
- * Initializes the parameters and does one-time calculations
+ * Initializes the parameters and performs the one-time-only calculations
  */
 {
 	/* set the f parameter */

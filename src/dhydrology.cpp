@@ -42,20 +42,20 @@ extern "C" {
 		/**
 		 *  @brief Updates the hydrological model
 		 *  
-		 *  @param precipitation (mm in this timestep)
-		 *  @param PotEvap (mm in this timestep)
-		 *  @param WaterFrac (fraction of Open water between 0-1)
-		 *  @double WaterLevel (m)
-		 *  @double tiemstep length of this timestep (s)
+		 *  @param[in] precipitation Precip in this timestep [mm]
+		 *  @param[in] PotEvap Potential Evapotranspiration this timestep [mm]
+		 *  @param[in] WaterFrac Fraction of Open water between 0-1 [-]
+		 *  @param[in] WaterLevel Average level of open water [m]
+		 *  @param[in] timestep length of this timestep [s]
 		 *  
 		 *  State variables:
-		 *  @param *CanopyStorage (mm)
-		 *  @param *UStoreDetpt (mm)
-		 *  @param *FirstZoneDepth (mm)
+		 *  @param[in,out] *CanopyStorage Actual Iterception storage [mm]
+		 *  @param[in,out] *UStoreDepth Storage in the unsaturated zone (mm)
+		 *  @param[in,out] *FirstZoneDepth Storage in the saturated zone [mm]
 		 *  
 		 *  Output
-		 *  @param *EvapoTranspiration (mm)
-		 *  @param *ToRunoff (mm) met runoff (can also be -)
+		 *  @param[out] *EvapoTranspiration Actual evapotranspiration [mm]
+		 *  @param[out] *ToRunoff Net runoff to open water (can also be -) [mm]
 		 */
 	{
 		state_sbm.CanopyStorage = *CanopyStorage;
