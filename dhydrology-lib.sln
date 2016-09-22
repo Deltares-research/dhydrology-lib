@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8134CF85-B2C3-4798-A610-FD8BE8CBB518}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dhydrology", "src\dhydrology.vcxproj", "{22FEBACD-5847-46BB-854C-85CE6A7C0C03}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "dhydrology-test", "python\dhydrology-test\dhydrology-test.pyproj", "{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "dhydrology-py", "python\dhydrology-py\dhydrology-py.pyproj", "{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "dhydrology-py-test", "python\dhydrology-py-test\dhydrology-py-test.pyproj", "{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testapp", "testapp\testapp.vcxproj", "{A7D64153-D59B-4D52-A82D-021812683725}"
 EndProject
@@ -16,9 +18,11 @@ Global
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
 		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Debug|Any CPU.ActiveCfg = Debug|Win32
@@ -26,34 +30,53 @@ Global
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Debug|Win32.ActiveCfg = Debug|Win32
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Debug|Win32.Build.0 = Debug|Win32
+		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Debug|x64.ActiveCfg = Debug|x64
+		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Debug|x64.Build.0 = Debug|x64
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|Any CPU.ActiveCfg = Release|Win32
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|Win32.ActiveCfg = Release|Win32
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|Win32.Build.0 = Release|Win32
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A}.Release|Win32.ActiveCfg = Release|Any CPU
+		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|x64.ActiveCfg = Release|x64
+		{22FEBACD-5847-46BB-854C-85CE6A7C0C03}.Release|x64.Build.0 = Release|x64
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Release|Win32.ActiveCfg = Release|Any CPU
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93}.Release|x64.ActiveCfg = Release|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Release|Win32.ActiveCfg = Release|Any CPU
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF}.Release|x64.ActiveCfg = Release|Any CPU
 		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|Win32.ActiveCfg = Debug|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|Win32.Build.0 = Debug|Win32
+		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|x64.ActiveCfg = Debug|x64
+		{A7D64153-D59B-4D52-A82D-021812683725}.Debug|x64.Build.0 = Debug|x64
 		{A7D64153-D59B-4D52-A82D-021812683725}.Release|Any CPU.ActiveCfg = Release|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Release|Win32.ActiveCfg = Release|Win32
 		{A7D64153-D59B-4D52-A82D-021812683725}.Release|Win32.Build.0 = Release|Win32
+		{A7D64153-D59B-4D52-A82D-021812683725}.Release|x64.ActiveCfg = Release|x64
+		{A7D64153-D59B-4D52-A82D-021812683725}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{22FEBACD-5847-46BB-854C-85CE6A7C0C03} = {8134CF85-B2C3-4798-A610-FD8BE8CBB518}
-		{63DA84B0-03DD-4832-9B92-8DA07D9DFE8A} = {8134CF85-B2C3-4798-A610-FD8BE8CBB518}
+		{C16B42BE-AA8F-4355-B208-4F1FEC25DD93} = {8134CF85-B2C3-4798-A610-FD8BE8CBB518}
+		{8421DB83-7CE5-4B45-A268-CC44C83BDEBF} = {8134CF85-B2C3-4798-A610-FD8BE8CBB518}
 		{A7D64153-D59B-4D52-A82D-021812683725} = {8134CF85-B2C3-4798-A610-FD8BE8CBB518}
 	EndGlobalSection
 EndGlobal

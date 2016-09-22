@@ -14,6 +14,11 @@ void main()
 #endif
 
 extern "C" {
+    EXPORT_API void HELLO_DHYDRO(char* s)
+    {
+        printf("%s\n", s);
+    }
+
     EXPORT_API int HYDRO_INITIALIZE(char *configfile)
     {
 		int ret = wfhydro_sbm_initial(&par_sbm);
